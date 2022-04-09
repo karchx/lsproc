@@ -12,9 +12,38 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strconv"
+	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-func ListeService() {
+var (
+	mode    string
+	rootCmd = &cobra.Command{
+		Use:   "lsproc",
+		Short: "Use mode ui or cli",
+	}
+)
+
+func init() {
+	rootCmd.PersistentFlags().StringVarP(&mode, "mode", "m", "", "Mode Execute")
+}
+
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+func decryptPort(hex string) int32 {
+	decimal, err := strconv.ParseInt(hex, 16, 32)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return int32(decimal)
+}
+
+func ListenService() {
 	var (
 		out []byte
 		err error
@@ -25,5 +54,10 @@ func ListeService() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(out))
+	pidHex := strings.Split(string(out), ":")
+
+	for _, value := range pidHex {
+		// port := decryptPort(value)
+		fmt.Println(value)
+	}
 }
