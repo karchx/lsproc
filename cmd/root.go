@@ -9,11 +9,12 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -24,6 +25,10 @@ var (
 		Use:   "lsproc",
 		Short: "Use mode ui or cli",
 	}
+	host    = "127.0.0.1"
+	ports   = "1-65535"
+	threads = 1000
+	timeout = 1 * time.Second
 )
 
 func init() {
@@ -34,17 +39,8 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-func decryptPort(hex string) int32 {
-	decimal, err := strconv.ParseInt(hex, 16, 32)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return int32(decimal)
-}
-
 func ListenService() {
-	var (
+	/*var (
 		out []byte
 		err error
 	)
@@ -54,10 +50,28 @@ func ListenService() {
 		log.Fatal(err)
 	}
 
-	pidHex := strings.Split(string(out), ":")
+	pidHex := strings.Split(string(out), ":")[1]
+	// valor := strings.Split("8001A8C0:B8FA", ":")[1]
+	fmt.Println(pidHex)*/
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	for _, value := range pidHex {
-		// port := decryptPort(value)
-		fmt.Println(value)
+	pR := processRange(ctx, ports)
+	sP := scanPorts(ctx, pR)
+
+	for port := range sP {
+		if strings.HasSuffix(port, ": Abierto") {
+			ports := strings.Split(port, ": Abierto")
+			fmt.Print(ports)
+		}
 	}
+}
+
+func decryptPort(hex string) int32 {
+	decimal, err := strconv.ParseInt(hex, 16, 32)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return int32(decimal)
 }
