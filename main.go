@@ -1,7 +1,18 @@
 package main
 
-import "github.com/KenethSandoval/lsproc/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/KenethSandoval/lsproc/ui"
+)
 
 func main() {
-	cmd.ListenService()
+	// call cmd.Execute()
+	// cmd.ListenService()
+	// TODO: mover a cmd/root
+	if err := ui.NewProgram().Start(); err != nil {
+		fmt.Println("Could not start ui", err)
+		os.Exit(1)
+	}
 }
