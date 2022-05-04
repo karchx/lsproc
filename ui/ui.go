@@ -1,21 +1,29 @@
 package ui
 
 import (
-	"fmt"
-
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 )
 
+type item struct {
+	title, desc string
+}
+
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return i.desc }
+func (i item) FilterValue() string { return i.title }
+
 var (
-	color   = termenv.EnvColorProfile().Color
-	keyword = termenv.Style{}.Foreground(color("204")).Background(color("235")).Styled
-	help    = termenv.Style{}.Foreground(color("241")).Styled
+	color    = termenv.EnvColorProfile().Color
+	keyword  = termenv.Style{}.Foreground(color("204")).Background(color("235")).Styled
+	help     = termenv.Style{}.Foreground(color("241")).Styled
+	docStyle = lipgloss.NewStyle().Margin(1, 2)
 )
 
 type model struct {
-	altscreen bool
-	quitting  bool
+	list list.Model
 }
 
 func (m model) Init() tea.Cmd {
@@ -27,41 +35,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
-			m.quitting = true
 			return m, tea.Quit
-		case " ":
-			var cmd tea.Cmd
-			if m.altscreen {
-				cmd = tea.ExitAltScreen
-			} else {
-				cmd = tea.EnterAltScreen
-			}
-			m.altscreen = !m.altscreen
-			return m, cmd
 		}
+	case tea.WindowSizeMsg:
+		h, v := docStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
-	return m, nil
-
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
 }
 
 func (m model) View() string {
-	if m.quitting {
-		return "Bye!\n"
-	}
-
-	const (
-		altscreenMode = " altscreen mode "
-		inlineMode    = " inline mode "
-	)
-	var mode string
-	if m.altscreen {
-		mode = altscreenMode
-	} else {
-		mode = inlineMode
-	}
-	return fmt.Sprintf("\n\n You're in %s\n\n\n", keyword(mode)) + help(" space: switch mode • q: exit\n")
+	return docStyle.Render(m.list.View())
 }
 
 func NewProgram() *tea.Program {
-	return tea.NewProgram(model{})
+	procs := []list.Item{
+		item{title: "Angular", desc: "4200 port"},
+		item{title: "PHP", desc: "8000 port"},
+	}
+	m := model{list: list.New(procs, list.NewDefaultDelegate(), 0, 0)}
+	m.list.Title = "Processes TCP"
+	return tea.NewProgram(m, tea.WithAltScreen())
 }
