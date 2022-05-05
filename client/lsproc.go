@@ -1,4 +1,4 @@
-package cmd
+package client
 
 import (
 	"context"
@@ -8,6 +8,13 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
+)
+
+var (
+	host    = "127.0.0.1"
+	threads = 1000
+	timeout = 1 * time.Second
 )
 
 func processRange(ctx context.Context, r string) chan int {
