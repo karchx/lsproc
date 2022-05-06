@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+type ScanPort struct {
+	Port string
+	Open bool
+}
+
 var (
 	host    = "127.0.0.1"
 	threads = 1000

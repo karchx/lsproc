@@ -10,6 +10,10 @@ import (
 
 var ports = "1-65535"
 
+type portOpen struct {
+	Port string
+}
+
 func ListenService() {
 	/*var (
 		out []byte
@@ -29,11 +33,12 @@ func ListenService() {
 
 	pR := processRange(ctx, ports)
 	sP := scanPorts(ctx, pR)
-
+	portS := portOpen{}
 	for port := range sP {
 		if strings.HasSuffix(port, ": Abierto") {
-			ports := strings.Split(port, ": Abierto")
-			fmt.Print(ports)
+			portsA := strings.Split(port, ": Abierto")
+			portS = portOpen{Port: portsA[0]}
+			fmt.Println(portS)
 		}
 	}
 }

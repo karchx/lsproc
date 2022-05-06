@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/KenethSandoval/lsproc/client"
 	"github.com/KenethSandoval/lsproc/ui"
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,8 @@ var rootCmd = &cobra.Command{
 				os.Exit(1)
 
 			}
+		} else if mode == "cli" {
+			client.ListenService()
 		}
 	},
 }
