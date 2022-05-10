@@ -63,8 +63,8 @@ func processRange(ctx context.Context, r string) chan int {
 	return c
 }
 
-func scanPorts(ctx context.Context, in <-chan int) chan string {
-	out := make(chan string)
+func scanPorts(ctx context.Context, in <-chan int) chan int {
+	out := make(chan int)
 	done := ctx.Done()
 	var wg sync.WaitGroup
 	wg.Add(threads)
@@ -80,7 +80,7 @@ func scanPorts(ctx context.Context, in <-chan int) chan string {
 					if !ok {
 						return
 					}
-					s := scanPort(port)
+					s, _ := scanPort(port)
 					select {
 					case out <- s:
 					case <-done:
@@ -99,13 +99,13 @@ func scanPorts(ctx context.Context, in <-chan int) chan string {
 	return out
 }
 
-func scanPort(port int) string {
+func scanPort(port int) (int, error) {
 	addr := fmt.Sprintf("%s:%d", host, port)
 	conn, err := net.DialTimeout("tcp", addr, timeout)
 	if err != nil {
-		return fmt.Sprintf("%d: %s", port, err.Error())
+		return 0, err
 	}
 	conn.Close()
 
-	return fmt.Sprintf("%d: Abierto", port)
+	return port, nil
 }

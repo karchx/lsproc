@@ -2,17 +2,11 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
-	"strings"
 )
 
 var ports = "1-65535"
-
-type portOpen struct {
-	Port string
-}
 
 func ListenService() {
 	/*var (
@@ -33,12 +27,10 @@ func ListenService() {
 
 	pR := processRange(ctx, ports)
 	sP := scanPorts(ctx, pR)
-	portS := portOpen{}
+	var portsCtx []int
 	for port := range sP {
-		if strings.HasSuffix(port, ": Abierto") {
-			portsA := strings.Split(port, ": Abierto")
-			portS = portOpen{Port: portsA[0]}
-			fmt.Println(portS)
+		if port != 0 {
+			portsCtx = append(portsCtx, port)
 		}
 	}
 }
