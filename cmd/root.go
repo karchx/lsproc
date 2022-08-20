@@ -10,8 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/KenethSandoval/lsproc/client"
-	"github.com/KenethSandoval/lsproc/ui"
+	"github.com/karchx/lsproc/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -22,16 +21,12 @@ var rootCmd = &cobra.Command{
 	Short:   "A terminal user interface for the open tcp process",
 	Example: "lsproc",
 	Run: func(cmd *cobra.Command, _ []string) {
-		// TODO: get ip
-		if mode == "ui" {
-			if err := ui.NewProgram().Start(); err != nil {
-				fmt.Println("Could not start ui", err)
-				os.Exit(1)
+		if err := ui.NewProgram().Start(); err != nil {
+			fmt.Println("Could not start ui", err)
+			os.Exit(1)
 
-			}
-		} else if mode == "cli" {
-			client.ListenService()
 		}
+
 	},
 }
 

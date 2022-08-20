@@ -1,4 +1,4 @@
-module github.com/KenethSandoval/lsproc
+module github.com/karchx/lsproc
 
 go 1.17
 

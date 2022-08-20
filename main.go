@@ -1,6 +1,6 @@
 package main
 
-import "github.com/KenethSandoval/lsproc/cmd"
+import "github.com/karchx/lsproc/cmd"
 
 func main() {
 	cmd.Execute()
