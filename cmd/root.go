@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/karchx/lsproc/ui"
+	"github.com/karchx/lsproc/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 	Short:   "A terminal user interface for the open tcp process",
 	Example: "lsproc",
 	Run: func(cmd *cobra.Command, _ []string) {
-		if err := ui.NewProgram().Start(); err != nil {
+		if err := tui.NewProgram().Start(); err != nil {
 			fmt.Println("Could not start ui", err)
 			os.Exit(1)
 
