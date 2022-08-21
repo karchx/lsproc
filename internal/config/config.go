@@ -26,7 +26,7 @@ type SettingsConfig struct {
 
 // Config represents the main config for the application.
 type Config struct {
-	Settings SettingsConfig `yaml:"settings"`
+	Services []SettingsConfig `yaml:"settings"`
 }
 
 type configError struct {
