@@ -17,8 +17,8 @@ const ConfigFileName = "config.yml"
 
 // SettingsConfig represents the config for services run.
 type SettingsConfig struct {
+	NameApp        string `yaml:"name"`
 	PortApp        string `yaml:"port"`
-	NameService    string `yaml:"name"`
 	NameCommand    string `yaml:"command"`
 	PathApp        string `yaml:"path"`
 	PrivilegesRoot bool   `yaml:"root"`
@@ -26,7 +26,9 @@ type SettingsConfig struct {
 
 // Config represents the main config for the application.
 type Config struct {
-	Services []SettingsConfig `yaml:"settings"`
+	Services struct {
+		Containers []SettingsConfig `yaml:"containers,flow"`
+	}
 }
 
 type configError struct {
@@ -39,15 +41,7 @@ type ConfigParser struct{}
 
 // getDefaultConfig returns the default config for the application.
 func (parser ConfigParser) getDefaultConfig() Config {
-	return Config{
-		Settings: SettingsConfig{
-			PortApp:        "0000",
-			NameService:    "example",
-			NameCommand:    "run",
-			PathApp:        ".",
-			PrivilegesRoot: false,
-		},
-	}
+	return Config{}
 }
 
 // getDefaultConfigYamlContents returns the default config file contents.
@@ -129,13 +123,13 @@ func (e parsingError) Error() string {
 }
 
 func (parser ConfigParser) readConfigFile(path string) (Config, error) {
-	config := parser.getDefaultConfig()
+	config := Config{}
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return config, configError{parser: parser, configDir: path, err: err}
 	}
 
-	err = yaml.Unmarshal((data), &config)
+	err = yaml.Unmarshal(data, &config)
 	return config, err
 }
 

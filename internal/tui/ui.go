@@ -1,9 +1,12 @@
 package tui
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/karchx/lsproc/internal/config"
 	"github.com/muesli/termenv"
 )
 
@@ -31,6 +34,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -51,10 +55,18 @@ func (m model) View() string {
 }
 
 func NewProgram() *tea.Program {
-	procs := []list.Item{
-		item{title: "Angular", desc: "4200 port"},
-		item{title: "PHP", desc: "8000 port"},
+	cfg, err := config.ParseConfig()
+
+	if err != nil {
+		fmt.Print(err)
 	}
+
+	var procs []list.Item
+	for _, s := range cfg.Services.Containers {
+		ap := item{title: s.NameApp, desc: s.NameCommand}
+		procs = append(procs, ap)
+	}
+
 	m := model{list: list.New(procs, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "Processes TCP"
 	return tea.NewProgram(m, tea.WithAltScreen())
