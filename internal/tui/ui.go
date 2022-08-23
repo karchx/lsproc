@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/karchx/lsproc/internal/client"
 	"github.com/karchx/lsproc/internal/config"
 	"github.com/muesli/termenv"
 )
@@ -40,6 +41,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
 			return m, tea.Quit
+		case "enter":
+			//i := m.list.SelectedItem()
+			/*if err := client.RunCommand("ng"); err != nil {
+				fmt.Printf("ERROR: %v", err)
+			}*/
+			out, _ := client.RunCommand("ng version")
+			fmt.Println(out)
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
@@ -63,7 +71,7 @@ func NewProgram() *tea.Program {
 
 	var procs []list.Item
 	for _, s := range cfg.Services.Containers {
-		ap := item{title: s.NameApp, desc: s.NameCommand}
+		ap := item{title: s.NameApp, desc: s.Command}
 		procs = append(procs, ap)
 	}
 

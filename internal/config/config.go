@@ -19,7 +19,7 @@ const ConfigFileName = "config.yml"
 type SettingsConfig struct {
 	NameApp        string `yaml:"name"`
 	PortApp        string `yaml:"port"`
-	NameCommand    string `yaml:"command"`
+	Command        string `yaml:"command"`
 	PathApp        string `yaml:"path"`
 	PrivilegesRoot bool   `yaml:"root"`
 }

@@ -2,11 +2,23 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os/exec"
 	"strconv"
+	"strings"
 )
 
 var ports = "1-65535"
+
+type ErrorCommand struct {
+	message string
+	command string
+}
+
+func (r *ErrorCommand) Error() string {
+	return fmt.Sprintf("message %s: command %s", r.message, r.command)
+}
 
 func ListenService() {
 	/*var (
@@ -33,6 +45,20 @@ func ListenService() {
 			portsCtx = append(portsCtx, port)
 		}
 	}
+}
+
+func RunCommand(command string) (string, error) {
+	commandWithParams := strings.Split(command, " ")
+
+	if len(commandWithParams) > 1 {
+		cmd, err := exec.Command(commandWithParams[0], commandWithParams[1]).CombinedOutput()
+		if err != nil {
+			return "", err
+		}
+		return string(cmd), nil
+	}
+	return "", &ErrorCommand{message: "invalid command", command: command}
+
 }
 
 func decryptPort(hex string) int32 {
