@@ -47,16 +47,20 @@ func ListenService() {
 	}
 }
 
-func RunCommand(command string) (string, error) {
+// RunCommand run the command with the path of the configuration file for the application
+func RunCommand(command, path string) (string, error) {
 	commandWithParams := strings.Split(command, " ")
 
 	if len(commandWithParams) > 1 {
-		cmd, err := exec.Command(commandWithParams[0], commandWithParams[1]).CombinedOutput()
+		cmd := exec.Command(commandWithParams[0], commandWithParams[1])
+		cmd.Dir = path
+		out, err := cmd.CombinedOutput()
 		if err != nil {
 			return "", err
 		}
-		return string(cmd), nil
+		return string(out), nil
 	}
+
 	return "", &ErrorCommand{message: "invalid command", command: command}
 
 }

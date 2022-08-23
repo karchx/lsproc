@@ -15,9 +15,17 @@ type item struct {
 	title, desc string
 }
 
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return i.desc }
-func (i item) FilterValue() string { return i.title }
+type SettingsConfig struct {
+	NameApp        string
+	PortApp        string
+	Command        string
+	PathApp        string
+	PrivilegesRoot bool
+}
+
+func (i SettingsConfig) Title() string       { return i.NameApp }
+func (i SettingsConfig) Description() string { return i.Command }
+func (i SettingsConfig) FilterValue() string { return i.NameApp }
 
 var (
 	color    = termenv.EnvColorProfile().Color
@@ -27,7 +35,8 @@ var (
 )
 
 type model struct {
-	list list.Model
+	list  list.Model
+	items []list.Item
 }
 
 func (m model) Init() tea.Cmd {
@@ -42,12 +51,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c", "esc":
 			return m, tea.Quit
 		case "enter":
-			//i := m.list.SelectedItem()
-			/*if err := client.RunCommand("ng"); err != nil {
-				fmt.Printf("ERROR: %v", err)
-			}*/
-			out, _ := client.RunCommand("ng version")
-			fmt.Println(out)
+			i := m.list.SelectedItem().(SettingsConfig)
+			out, err := client.RunCommand(i.Command, i.PathApp)
+			if err != nil {
+
+				fmt.Printf("ERROR: %v ", err.Error())
+			}
+			fmt.Printf("%s ", out)
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
@@ -71,11 +81,11 @@ func NewProgram() *tea.Program {
 
 	var procs []list.Item
 	for _, s := range cfg.Services.Containers {
-		ap := item{title: s.NameApp, desc: s.Command}
+		ap := SettingsConfig{NameApp: s.NameApp, Command: s.Command, PathApp: s.PathApp}
 		procs = append(procs, ap)
 	}
 
 	m := model{list: list.New(procs, list.NewDefaultDelegate(), 0, 0)}
-	m.list.Title = "Processes TCP"
+	m.list.Title = "Services list"
 	return tea.NewProgram(m, tea.WithAltScreen())
 }
