@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/karchx/lsproc/internal/client"
@@ -32,11 +33,22 @@ var (
 	keyword  = termenv.Style{}.Foreground(color("204")).Background(color("235")).Styled
 	help     = termenv.Style{}.Foreground(color("241")).Styled
 	docStyle = lipgloss.NewStyle().Margin(1, 2)
+
+	viewportStyle = lipgloss.NewStyle().
+			Margin(0, 0, 0, 0).
+			Padding(1, 1).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("#874BFD")).
+			BorderTop(true).
+			BorderLeft(true).
+			BorderRight(true).
+			BorderBottom(true)
 )
 
 type model struct {
-	list  list.Model
-	items []list.Item
+	list     list.Model
+	items    []list.Item
+	viewport viewport.Model
 }
 
 func (m model) Init() tea.Cmd {
@@ -54,14 +66,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			i := m.list.SelectedItem().(SettingsConfig)
 			out, err := client.RunCommand(i.Command, i.PathApp)
 			if err != nil {
-
 				fmt.Printf("ERROR: %v ", err.Error())
 			}
-			fmt.Printf("%s ", out)
+			content := lipgloss.NewStyle().Width(m.viewport.Width).Height(m.viewport.Height).Render(out)
+			m.viewport.SetContent(content)
+			return m, nil
+
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
+
+		m.viewport = viewport.New(100, 25)
 	}
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
@@ -69,7 +85,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return docStyle.Render(m.list.View())
+	var view string
+
+	view = lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		docStyle.Render(m.list.View()),
+		viewportStyle.Render(m.viewport.View()),
+	)
+	return view
 }
 
 func NewProgram() *tea.Program {
