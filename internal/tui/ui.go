@@ -1,20 +1,17 @@
 package tui
 
 import (
+	"bufio"
 	"fmt"
+	"os/exec"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/karchx/lsproc/internal/client"
 	"github.com/karchx/lsproc/internal/config"
 	"github.com/muesli/termenv"
 )
-
-type item struct {
-	title, desc string
-}
 
 type SettingsConfig struct {
 	NameApp        string
@@ -55,6 +52,29 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
+type Data struct {
+	output string
+}
+
+func runCommand(ch chan<- Data, path string) {
+	var m string
+	cmd := exec.Command("ng", "serve")
+	cmd.Dir = path
+	out, _ := cmd.StdoutPipe()
+	cmd.Start()
+
+	scanner := bufio.NewScanner(out)
+	//scanner.Split(bufio.ScanWords)
+	for scanner.Scan() {
+		m = scanner.Text()
+	}
+	cmd.Wait()
+	ch <- Data{
+		output: m,
+	}
+
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
@@ -63,13 +83,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c", "esc":
 			return m, tea.Quit
 		case "enter":
+			c := make(chan Data)
 			i := m.list.SelectedItem().(SettingsConfig)
-			out, err := client.RunCommand(i.Command, i.PathApp)
-			if err != nil {
-				fmt.Printf("ERROR: %v ", err.Error())
-			}
-			content := lipgloss.NewStyle().Width(m.viewport.Width).Height(m.viewport.Height).Render(out)
-			m.viewport.SetContent(content)
+			// out, err := client.RunCommand(i.Command, i.PathApp)
+			go runCommand(c, i.PathApp)
+
+			res := <-c
+
+			//content := lipgloss.NewStyle().Width(m.viewport.Width).Height(m.viewport.Height).Render(res)
+			m.viewport.SetContent(res.output)
+			fmt.Println(res.output)
 			return m, nil
 
 		}
