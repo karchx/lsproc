@@ -1,14 +1,13 @@
 package tui
 
 import (
-	"bufio"
 	"fmt"
-	"os/exec"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/karchx/lsproc/internal/client"
 	"github.com/karchx/lsproc/internal/config"
 	"github.com/muesli/termenv"
 )
@@ -52,29 +51,6 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-type Data struct {
-	output string
-}
-
-func runCommand(ch chan<- Data, path string) {
-	var m string
-	cmd := exec.Command("ng", "serve")
-	cmd.Dir = path
-	out, _ := cmd.StdoutPipe()
-	cmd.Start()
-
-	scanner := bufio.NewScanner(out)
-	//scanner.Split(bufio.ScanWords)
-	for scanner.Scan() {
-		m = scanner.Text()
-	}
-	cmd.Wait()
-	ch <- Data{
-		output: m,
-	}
-
-}
-
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
@@ -83,16 +59,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c", "esc":
 			return m, tea.Quit
 		case "enter":
-			c := make(chan Data)
 			i := m.list.SelectedItem().(SettingsConfig)
-			// out, err := client.RunCommand(i.Command, i.PathApp)
-			go runCommand(c, i.PathApp)
+			out, _ := client.RunCommand(i.Command, i.PathApp)
 
-			res := <-c
-
-			//content := lipgloss.NewStyle().Width(m.viewport.Width).Height(m.viewport.Height).Render(res)
-			m.viewport.SetContent(res.output)
-			fmt.Println(res.output)
+			content := lipgloss.NewStyle().Width(m.viewport.Width).Height(m.viewport.Height).Render(out)
+			m.viewport.SetContent(content)
 			return m, nil
 
 		}

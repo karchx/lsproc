@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -15,10 +14,6 @@ var ports = "1-65535"
 type ErrorCommand struct {
 	message string
 	command string
-}
-
-type Data struct {
-	output string
 }
 
 func (r *ErrorCommand) Error() string {
@@ -53,47 +48,35 @@ func ListenService() {
 }
 
 // RunCommand run the command with the path of the configuration file for the application
-/*func RunCommand(command, path string) (string, error) {
-	var m string
+func RunCommand(command, path string) (string, error) {
+	var m string = ""
 	commandWithParams := strings.Split(command, " ")
 
 	if len(commandWithParams) > 1 {
 		cmd := exec.Command(commandWithParams[0], commandWithParams[1])
 		cmd.Dir = path
-		out, err := cmd.StdoutPipe()
-		if err != nil {
-			return "", err
-		}
-		cmd.Start()
 
-		scanner := bufio.NewScanner(out)
-		//scanner.Split(bufio.ScanWords)
-		for scanner.Scan() {
-			m = scanner.Text()
+		m = fmt.Sprintf("- Start")
+
+		err := cmd.Start()
+		if err != nil {
+			return "", &ErrorCommand{message: err.Error(), command: command}
 		}
-		cmd.Wait()
+
+		m = fmt.Sprintf("%s \nWe could do here something before we wait for the job to finish.", m)
+
+		err = cmd.Wait()
+
+		//fmt.Printf("- Command finished\\n")
+
+		if err != nil {
+			return "", &ErrorCommand{message: err.Error(), command: command}
+		}
 		return m, nil
 
 	}
 
 	return "", &ErrorCommand{message: "invalid command", command: command}
-
-  }*/
-func RunCommand(command, path string, ch chan<- string) {
-	var m string
-	commandWithParams := strings.Split(command, " ")
-	cmd := exec.Command(commandWithParams[0], commandWithParams[1])
-	cmd.Dir = path
-	out, _ := cmd.StdoutPipe()
-
-	cmd.Start()
-
-	scanner := bufio.NewScanner(out)
-	for scanner.Scan() {
-		m = scanner.Text()
-	}
-	cmd.Wait()
-	ch <- m
 }
 
 func decryptPort(hex string) int32 {
