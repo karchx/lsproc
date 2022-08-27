@@ -7,9 +7,9 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"log"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/karchx/lsproc/internal/tui"
 	"github.com/spf13/cobra"
 )
@@ -21,12 +21,15 @@ var rootCmd = &cobra.Command{
 	Short:   "A terminal user interface for the open tcp process",
 	Example: "lsproc",
 	Run: func(cmd *cobra.Command, _ []string) {
-		if err := tui.NewProgram().Start(); err != nil {
+    m := tui.New()
+    p := tea.NewProgram(m)
+    if err := p.Start(); err != nil {
+      log.Fatal("Failed to start", err)
+    }
+		/*if err := tui.NewProgram().Start(); err != nil {
 			fmt.Println("Could not start ui", err)
 			os.Exit(1)
-
-		}
-
+		}*/
 	},
 }
 
