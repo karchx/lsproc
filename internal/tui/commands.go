@@ -2,19 +2,16 @@ package tui
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 )
 
 
-func viewProc(/*conf *config.Config*/) string {
+func (b Bubble) viewProc(portApp string) bool {
   // lsof -i -P -n | grep LISTEN
-  filterTCP := fmt.Sprintf("lsof -i -P -n | grep LISTEN | grep %s", "4200")
-  cmd, err := exec.Command("/bin/bash", "-c", filterTCP).Output()
+  filterTCP := fmt.Sprintf("lsof -i -P -n | grep LISTEN | grep %s", portApp)
+  _, err := exec.Command("/bin/bash", "-c", filterTCP).Output()
   if err != nil {
-    log.Fatal(err)
-    return "fail"
+    return false
   }
-
-  return string(cmd)
+  return true
 }

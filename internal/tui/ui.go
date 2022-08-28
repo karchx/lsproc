@@ -1,18 +1,6 @@
 package tui
 
-import (
-	"fmt"
-
-	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/karchx/lsproc/internal/client"
-	"github.com/karchx/lsproc/internal/config"
-	"github.com/muesli/termenv"
-)
-
-type SettingsConfig struct {
+/*type SettingsConfig struct {
 	NameApp        string
 	PortApp        string
 	Command        string
@@ -105,4 +93,4 @@ func NewProgram() *tea.Program {
 	m := model{list: list.New(procs, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "Services list"
 	return tea.NewProgram(m, tea.WithAltScreen())
-}
+}*/

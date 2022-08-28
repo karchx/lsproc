@@ -6,7 +6,7 @@ type KeyMap struct {
   Quit         key.Binding
 	Exit         key.Binding
 	ToggleBox    key.Binding
-	ReloadConfig key.Binding
+   Enter key.Binding
 }
 
 func DefaultKeyMap() KeyMap {
@@ -20,8 +20,8 @@ func DefaultKeyMap() KeyMap {
     ToggleBox: key.NewBinding(
       key.WithKeys("tab"),
     ),
-    ReloadConfig: key.NewBinding(
-      key.WithKeys("ctrl+r"),
+    Enter: key.NewBinding(
+      key.WithKeys("enter"),
     ),
   }
 }
